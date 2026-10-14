@@ -9,34 +9,48 @@ function truncate(addr: string) {
   return addr.length > 12 ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : addr;
 }
 
-export default function WalletConnectButton({ onConnected }: { onConnected?: () => void }) {
-  const ready = useWalletReady();
+const BTN_STYLE = {
+  borderRadius: 15,
+  minHeight: 51,
+  fontSize: 14,
+  padding: "0 16px",
+} as const;
+
+/** Real AppKit button — only rendered when AppKit is initialized (hooks are safe here). */
+function AppKitConnectButton({ onConnected }: { onConnected?: () => void }) {
   const { open } = useAppKit();
   const { address, isConnected } = useAppKitAccount();
-  const [showNotice, setShowNotice] = useState(false);
 
-  function handleClick() {
-    if (!ready) {
-      setShowNotice(true);
-      return;
-    }
-    // Launches the real Reown AppKit modal (QR on mobile, wallet list on desktop).
-    open();
-    onConnected?.();
-  }
+  return (
+    <button
+      onClick={() => {
+        open();
+        onConnected?.();
+      }}
+      className="bs-btn-primary w-full text-white font-bold flex items-center justify-center gap-2"
+      style={BTN_STYLE}
+    >
+      <WalletIcon size={19} />
+      {isConnected && address ? truncate(address) : "Connect wallet"}
+    </button>
+  );
+}
+
+/** Fallback when no WalletConnect project ID is configured — no AppKit hooks touched. */
+function NoticeButton() {
+  const [showNotice, setShowNotice] = useState(false);
 
   return (
     <>
       <button
-        onClick={handleClick}
+        onClick={() => setShowNotice(true)}
         className="bs-btn-primary w-full text-white font-bold flex items-center justify-center gap-2"
-        style={{ borderRadius: 15, minHeight: 51, fontSize: 14, padding: "0 16px" }}
+        style={BTN_STYLE}
       >
         <WalletIcon size={19} />
-        {isConnected && address ? truncate(address) : "Connect wallet"}
+        Connect wallet
       </button>
 
-      {/* Friendly notice when no WalletConnect project ID is configured */}
       {showNotice && (
         <div
           className="fixed inset-0 z-[95] flex items-center justify-center p-4"
@@ -88,4 +102,11 @@ export default function WalletConnectButton({ onConnected }: { onConnected?: () 
       )}
     </>
   );
+}
+
+export default function WalletConnectButton({ onConnected }: { onConnected?: () => void }) {
+  const ready = useWalletReady();
+  // Never call AppKit hooks unless AppKit was initialized — otherwise the page crashes.
+  if (!ready) return <NoticeButton />;
+  return <AppKitConnectButton onConnected={onConnected} />;
 }
