@@ -142,33 +142,82 @@ export function TrustRow() {
   );
 }
 
-/** Floating glass decor orbs (hidden on small screens). */
+/** Floating glass decor — frosted bubbles with crypto glyphs + accent dots (hidden on small screens). */
 export function FloatingDecor() {
-  const orbs = [
-    { size: 84, top: "16%", left: "6%", delay: "0s", dur: "8s" },
-    { size: 56, top: "58%", left: "10%", delay: "1.4s", dur: "7s" },
-    { size: 68, top: "38%", right: "7%", delay: "0.8s", dur: "9s" },
-    { size: 40, top: "74%", right: "12%", delay: "2s", dur: "7.5s" },
+  const bubbles: {
+    size: number; top: string; left?: string; right?: string;
+    delay: string; dur: string; glyph?: "tether" | "eth" | "check"; diamond?: boolean;
+  }[] = [
+    { size: 76, top: "20%", left: "27%", delay: "0s", dur: "8s", glyph: "tether" },
+    { size: 52, top: "55%", left: "29%", delay: "1.6s", dur: "7s", glyph: "check" },
+    { size: 64, top: "56%", right: "28%", delay: "0.9s", dur: "9s", glyph: "eth", diamond: true },
+    { size: 44, top: "82%", left: "30%", delay: "2.2s", dur: "7.5s", glyph: "check" },
+  ];
+  const dots = [
+    { size: 8, top: "18%", right: "24%", color: "#8e7cff", delay: "0.4s", dur: "6s" },
+    { size: 10, top: "46%", left: "22%", color: "#8e7cff", delay: "1.8s", dur: "7s" },
+    { size: 8, top: "72%", right: "20%", color: "#6a8dff", delay: "1.1s", dur: "6.5s" },
+    { size: 6, top: "84%", left: "38%", color: "#8e7cff", delay: "2.6s", dur: "5.5s" },
+    { size: 7, top: "30%", right: "33%", color: "#6a8dff", delay: "0.2s", dur: "7.5s" },
   ];
   return (
     <div className="pointer-events-none fixed inset-0 z-0 hidden min-[521px]:block" aria-hidden>
-      {orbs.map((o, i) => (
+      {bubbles.map((b, i) => (
         <span
-          key={i}
+          key={`b${i}`}
+          className="bs-float absolute flex items-center justify-center"
+          style={{
+            width: b.size,
+            height: b.size,
+            top: b.top,
+            left: b.left,
+            right: b.right,
+            borderRadius: b.diamond ? 18 : 9999,
+            transform: b.diamond ? "rotate(12deg)" : undefined,
+            background: "rgba(255,255,255,0.42)",
+            border: "1px solid rgba(104,81,240,0.16)",
+            boxShadow: "0 14px 34px rgba(104,81,240,0.14), inset 0 2px 10px rgba(255,255,255,0.85)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            animationDelay: b.delay,
+            animationDuration: b.dur,
+            color: "#6851f0",
+          }}
+        >
+          {b.glyph === "tether" && (
+            <svg width={b.size * 0.42} height={b.size * 0.42} viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="13" fill="#26a17b" opacity="0.9" />
+              <path d="M10 11h12v2.6h-4.7V22h-2.6v-8.4H10V11z" fill="#fff" />
+            </svg>
+          )}
+          {b.glyph === "eth" && (
+            <svg width={b.size * 0.4} height={b.size * 0.4} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+              <path d="M12 2l7 10-7 4-7-4 7-10z" />
+              <path d="M5 12l7 4 7-4-7 10-7-10z" opacity="0.55" />
+            </svg>
+          )}
+          {b.glyph === "check" && (
+            <svg width={b.size * 0.36} height={b.size * 0.36} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12.5l5 5L20 6.5" />
+            </svg>
+          )}
+        </span>
+      ))}
+      {dots.map((d, i) => (
+        <span
+          key={`d${i}`}
           className="bs-float absolute rounded-full"
           style={{
-            width: o.size,
-            height: o.size,
-            top: o.top,
-            left: o.left,
-            right: o.right,
-            background: "rgba(255,255,255,0.5)",
-            border: "1px solid rgba(104,81,240,0.14)",
-            boxShadow: "0 14px 34px rgba(104,81,240,0.12), inset 0 2px 8px rgba(255,255,255,0.8)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
-            animationDelay: o.delay,
-            animationDuration: o.dur,
+            width: d.size,
+            height: d.size,
+            top: d.top,
+            left: d.left,
+            right: d.right,
+            background: d.color,
+            opacity: 0.75,
+            boxShadow: `0 4px 12px ${d.color}66`,
+            animationDelay: d.delay,
+            animationDuration: d.dur,
           }}
         />
       ))}

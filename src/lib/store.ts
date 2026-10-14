@@ -1,4 +1,4 @@
-import { put, head } from "@vercel/blob";
+import { put, list } from "@vercel/blob";
 
 export type InvoiceStatus = "processing" | "confirming" | "confirmed";
 
@@ -36,8 +36,11 @@ async function readInvoice(id: string): Promise<Invoice | null> {
   const token = blobToken();
   if (!token) return mem.get(id) ?? null;
   try {
-    const meta = await head(blobPath(id), { token });
-    const res = await fetch(meta.url);
+    // head() needs a full blob URL; list by exact prefix to resolve the URL.
+    const { blobs } = await list({ prefix: blobPath(id), limit: 1, token });
+    const blob = blobs[0];
+    if (!blob) return mem.get(id) ?? null;
+    const res = await fetch(blob.url);
     if (!res.ok) return null;
     return (await res.json()) as Invoice;
   } catch (err) {
