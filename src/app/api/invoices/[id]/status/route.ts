@@ -1,23 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb, InvoiceRow } from "@/lib/db";
+import { getInvoice } from "@/lib/store";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const db = getDb();
-  const row = db
-    .prepare("SELECT status, txid, source_address, updated_at FROM invoices WHERE id = ?")
-    .get(params.id) as
-    | Pick<InvoiceRow, "status" | "txid" | "source_address" | "updated_at">
-    | undefined;
-  if (!row) {
+  const invoice = await getInvoice(params.id);
+  if (!invoice) {
     return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
   }
   return NextResponse.json({
-    status: row.status,
-    txid: row.txid,
-    sourceAddress: row.source_address,
-    updatedAt: row.updated_at,
+    status: invoice.status,
+    txid: invoice.txid,
+    sourceAddress: invoice.sourceAddress,
+    updatedAt: invoice.updatedAt,
   });
 }

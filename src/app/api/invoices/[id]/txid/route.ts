@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb, InvoiceRow } from "@/lib/db";
+import { getInvoice, updateInvoice } from "@/lib/store";
 import { getNetwork, looksLikeTxHash } from "@/lib/networks";
 
 interface RpcReceipt {
@@ -39,15 +39,12 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const db = getDb();
-  const row = db.prepare("SELECT * FROM invoices WHERE id = ?").get(params.id) as
-    | InvoiceRow
-    | undefined;
-  if (!row) {
+  const invoice = await getInvoice(params.id);
+  if (!invoice) {
     return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
   }
-  if (row.status === "confirmed") {
-    return NextResponse.json({ status: "confirmed", txid: row.txid });
+  if (invoice.status === "confirmed") {
+    return NextResponse.json({ status: "confirmed", txid: invoice.txid });
   }
 
   let body: { txid?: unknown };
@@ -64,7 +61,7 @@ export async function POST(
     );
   }
 
-  const network = getNetwork(row.network);
+  const network = getNetwork(invoice.network);
 
   // On-chain verification where we have a public RPC (BSC).
   if (network?.rpcUrl) {
@@ -85,23 +82,23 @@ export async function POST(
         { status: 422 }
       );
     }
-    db.prepare(
-      `UPDATE invoices SET status = 'confirmed', txid = ?, source_address = ?, updated_at = datetime('now') WHERE id = ?`
-    ).run(txid, receipt.from ?? null, row.id);
-    return NextResponse.json({
+    const updated = await updateInvoice(invoice.id, {
       status: "confirmed",
       txid,
       sourceAddress: receipt.from ?? null,
     });
+    return NextResponse.json({
+      status: "confirmed",
+      txid,
+      sourceAddress: updated?.sourceAddress ?? null,
+    });
   }
 
   // Networks without a bundled public RPC: accept a well-formed hash and mark as confirming.
-  db.prepare(
-    `UPDATE invoices SET status = 'confirming', txid = ?, updated_at = datetime('now') WHERE id = ?`
-  ).run(txid, row.id);
+  await updateInvoice(invoice.id, { status: "confirming", txid });
   return NextResponse.json({
     status: "confirming",
     txid,
-    note: `No public RPC bundled for ${network?.name ?? row.network}; hash format accepted and queued for manual review.`,
+    note: `No public RPC bundled for ${network?.name ?? invoice.network}; hash format accepted and queued for manual review.`,
   });
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
-import { getDb, rowToInvoice, InvoiceRow } from "@/lib/db";
+import { createInvoice } from "@/lib/store";
 import { getNetwork } from "@/lib/networks";
 
 function makeInvoiceNumber(): string {
@@ -36,42 +36,31 @@ export async function POST(req: NextRequest) {
       ? body.label.trim().slice(0, 140)
       : null;
 
-  const db = getDb();
-  const id = randomUUID();
-  // Extremely unlikely collision; retry once on unique violation.
-  let invoiceNumber = makeInvoiceNumber();
-  const insert = () =>
-    db
-      .prepare(
-        `INSERT INTO invoices (id, invoice_number, amount, currency, network, label, status)
-         VALUES (?, ?, ?, 'USDT', ?, ?, 'processing')`
-      )
-      .run(id, invoiceNumber, amount, network.id, label);
   try {
-    insert();
-  } catch {
-    invoiceNumber = makeInvoiceNumber();
-    try {
-      insert();
-    } catch {
-      return NextResponse.json({ error: "Could not create invoice, try again" }, { status: 500 });
-    }
-  }
-
-  const row = db.prepare("SELECT * FROM invoices WHERE id = ?").get(id) as InvoiceRow;
-  const invoice = rowToInvoice(row);
-  return NextResponse.json(
-    {
-      id: invoice.id,
-      invoiceNumber: invoice.invoiceNumber,
-      amount: invoice.amount,
-      currency: invoice.currency,
+    const invoice = await createInvoice({
+      id: randomUUID(),
+      invoiceNumber: makeInvoiceNumber(),
+      amount,
+      currency: "USDT",
       network: network.id,
-      networkName: network.name,
-      label: invoice.label,
-      status: invoice.status,
-      createdAt: invoice.createdAt,
-    },
-    { status: 201 }
-  );
+      label,
+    });
+    return NextResponse.json(
+      {
+        id: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        amount: invoice.amount,
+        currency: invoice.currency,
+        network: network.id,
+        networkName: network.name,
+        label: invoice.label,
+        status: invoice.status,
+        createdAt: invoice.createdAt,
+      },
+      { status: 201 }
+    );
+  } catch (err) {
+    console.error("createInvoice failed:", err);
+    return NextResponse.json({ error: "Could not create invoice, try again" }, { status: 500 });
+  }
 }
