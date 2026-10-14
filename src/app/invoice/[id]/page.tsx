@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import WalletConnectButton from "@/components/WalletConnectButton";
-import TxidForm from "@/components/TxidForm";
+import BootIntro from "@/components/BootIntro";
+import Brandbar from "@/components/Brandbar";
 import SupportChat from "@/components/SupportChat";
+import TxidForm from "@/components/TxidForm";
+import WalletConnectButton from "@/components/WalletConnectButton";
+import { StatusPill, Toast, TrustRow, FloatingDecor, ChevronIcon } from "@/components/ui";
 
 interface Invoice {
   id: string;
@@ -20,29 +23,6 @@ interface Invoice {
   createdAt: string;
 }
 
-function StatusPill({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    processing: "bg-violet-100 text-violet-700",
-    confirming: "bg-amber-100 text-amber-700",
-    confirmed: "bg-emerald-100 text-emerald-700",
-  };
-  const labels: Record<string, string> = {
-    processing: "Processing",
-    confirming: "Confirming",
-    confirmed: "Confirmed",
-  };
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
-        styles[status] ?? styles.processing
-      }`}
-    >
-      <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-      {labels[status] ?? status}
-    </span>
-  );
-}
-
 function formatDate(iso: string) {
   const d = new Date(iso.endsWith("Z") || iso.includes("+") ? iso : iso + "Z");
   return d.toLocaleString("en-US", {
@@ -54,14 +34,16 @@ function formatDate(iso: string) {
   });
 }
 
+const REVEAL_EASE = "cubic-bezier(.2,.75,.2,1)";
+
 export default function InvoicePage({ params }: { params: { id: string } }) {
   const { id } = params;
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rate, setRate] = useState<number>(1);
   const [rateLive, setRateLive] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(true);
+  const [toast, setToast] = useState<string | null>(null);
 
   const fetchInvoice = useCallback(async () => {
     const res = await fetch(`/api/invoices/${id}`);
@@ -114,6 +96,11 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
     return () => clearInterval(t);
   }, [fetchRate]);
 
+  function showToast(text: string) {
+    setToast(text);
+    setTimeout(() => setToast(null), 2000);
+  }
+
   async function copyInvoiceNumber() {
     if (!invoice) return;
     try {
@@ -126,18 +113,17 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
       document.execCommand("copy");
       document.body.removeChild(ta);
     }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    showToast("Copied");
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#f6f5fb] flex items-center justify-center px-6">
-        <div className="bg-white rounded-3xl border border-slate-200 p-10 text-center max-w-sm">
-          <div className="text-4xl mb-4">🧾</div>
-          <h1 className="font-bold text-lg mb-2">Invoice not found</h1>
-          <p className="text-sm text-slate-500 mb-6">{error}</p>
-          <Link href="/" className="text-violet-600 font-semibold text-sm hover:underline">
+      <div className="bs-page-bg min-h-screen flex items-center justify-center px-6">
+        <BootIntro />
+        <div className="bs-glass rounded-[26px] p-10 text-center max-w-sm relative z-10">
+          <h1 className="font-extrabold text-lg mb-2" style={{ color: "#11172c" }}>Invoice not found</h1>
+          <p className="text-sm mb-6" style={{ color: "#8f93a8" }}>{error}</p>
+          <Link href="/" className="text-sm font-bold" style={{ color: "#6851f0" }}>
             ← Create a new invoice
           </Link>
         </div>
@@ -147,10 +133,14 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
 
   if (!invoice) {
     return (
-      <div className="min-h-screen bg-[#f6f5fb] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-violet-200 border-t-violet-600 animate-spin" />
-          <p className="text-sm text-slate-500">Loading invoice…</p>
+      <div className="bs-page-bg min-h-screen flex items-center justify-center">
+        <BootIntro />
+        <div className="flex flex-col items-center gap-4 relative z-10">
+          <div
+            className="w-12 h-12 rounded-full animate-spin"
+            style={{ border: "4px solid #e9e5ff", borderTopColor: "#6851f0" }}
+          />
+          <p className="text-sm" style={{ color: "#8f93a8" }}>Loading invoice…</p>
         </div>
       </div>
     );
@@ -166,161 +156,230 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f6f5fb] text-slate-900">
-      {/* Header */}
-      <header className="flex items-center justify-between px-6 sm:px-10 py-5">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-extrabold text-lg">
-            S
-          </div>
-          <span className="text-xl font-bold tracking-tight">
-            Bit<span className="text-violet-600">Swap</span>
-          </span>
-        </Link>
-        <div className="flex items-center gap-2 text-xs font-medium text-slate-600 border border-slate-200 rounded-full px-3 py-1.5 bg-white">
-          <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          Secure invoice
-        </div>
-      </header>
+    <div className="bs-page-bg min-h-screen" style={{ color: "#11172c" }}>
+      <BootIntro />
+      <FloatingDecor />
 
-      <main className="max-w-xl mx-auto px-5 pb-24">
-        {/* Title block */}
-        <div className="flex items-start justify-between gap-4 mt-2 mb-6">
-          <div>
-            <p className="text-xs font-bold tracking-[0.18em] text-violet-600 uppercase mb-2">
-              Incoming transfer
-            </p>
-            <h1 className="text-3xl font-extrabold tracking-tight">Receiving {invoice.currency}</h1>
-            <p className="text-sm text-slate-500 mt-1.5">
-              Invoice <span className="font-mono font-semibold text-slate-700">{invoice.invoiceNumber}</span>
-              {invoice.label && <span className="text-slate-400"> · {invoice.label}</span>}
-            </p>
-          </div>
-          <StatusPill status={invoice.status} />
-        </div>
+      <div className="relative z-10 mx-auto w-full max-w-[480px] px-5" style={{ paddingTop: 30, paddingBottom: 48 }}>
+        <Brandbar />
 
-        {/* Amount card */}
-        <div className="rounded-3xl bg-gradient-to-br from-violet-500 via-[#6d58f6] to-indigo-600 text-white p-6 sm:p-7 mb-4 relative overflow-hidden shadow-[0_20px_50px_-18px_rgba(109,88,246,0.6)]">
-          <div className="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-white/10" />
-          <div className="absolute -right-2 top-10 w-24 h-24 rounded-full bg-white/10" />
-          <div className="flex items-center justify-between mb-6 relative">
-            <span className="text-sm text-white/80">You will receive</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 border border-white/25 px-2.5 py-1 text-xs font-bold">
-              <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] font-extrabold text-white">T</span>
-              {invoice.currency}
-            </span>
+        <main
+          className="bs-glass bs-reveal-card rounded-[26px]"
+          style={{ padding: 25, animationDuration: "0.85s", animationDelay: "1.62s" }}
+        >
+          {/* Head */}
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 780, letterSpacing: "0.12em", color: "#6851f0" }}>
+                INCOMING TRANSFER
+              </p>
+              <h1
+                className="mt-1.5"
+                style={{ fontSize: 26, fontWeight: 810, letterSpacing: "-0.045em", color: "#11172c" }}
+              >
+                Receiving <span style={{ color: "#6851f0" }}>{invoice.currency}</span>
+              </h1>
+              <p className="mt-1.5" style={{ fontSize: 12, color: "#8f93a8" }}>
+                Invoice{" "}
+                <span className="font-mono font-bold" style={{ color: "#343a52" }}>
+                  {invoice.invoiceNumber}
+                </span>
+                {invoice.label && <span> · {invoice.label}</span>}
+              </p>
+            </div>
+            <StatusPill status={invoice.status} />
           </div>
-          <div className="relative">
-            <span className="text-6xl font-extrabold tracking-tight">{invoice.amount}</span>
-            <span className="text-xl font-bold text-white/85 ml-2">{invoice.currency}</span>
-          </div>
-          <div className="text-white/80 text-sm mt-1.5 relative">≈ {usdValue} USD</div>
-        </div>
 
-        {/* Market rate card */}
-        <div className="rounded-2xl bg-white border border-slate-100 px-5 py-4 mb-4 flex items-center justify-between">
-          <div>
-            <div className="text-xs text-slate-400 mb-1">Current market rate</div>
-            <div className="font-bold">
-              1 {invoice.currency} = {rate.toFixed(2)} USD
+          <div className="my-5" style={{ borderTop: "1px solid rgba(75,62,177,0.1)" }} />
+
+          {/* Amount card */}
+          <p className="mb-2" style={{ fontSize: 10, fontWeight: 780, letterSpacing: "0.12em", color: "#8f93a8" }}>
+            TRANSFER AMOUNT
+          </p>
+          <div
+            className="bs-reveal bs-shine relative text-white"
+            style={{
+              minHeight: 151,
+              padding: 22,
+              borderRadius: 19,
+              background: "linear-gradient(135deg, #8e7cff 0%, #6a51ef 58%, #5238d7 100%)",
+              boxShadow: "0 18px 44px rgba(88,64,220,0.32)",
+              animationDuration: "0.8s",
+              animationDelay: "2.02s",
+              animationTimingFunction: REVEAL_EASE,
+            }}
+          >
+            <div className="bs-amount-glow" />
+            <div className="bs-amount-ring" />
+            <div className="relative flex items-center justify-between">
+              <span style={{ fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.85)" }}>
+                You will receive
+              </span>
+              <span
+                className="inline-flex items-center gap-1.5"
+                style={{
+                  fontSize: 11,
+                  fontWeight: 800,
+                  background: "rgba(255,255,255,0.16)",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  borderRadius: 9999,
+                  padding: "5px 10px 5px 6px",
+                }}
+              >
+                <span
+                  className="flex items-center justify-center"
+                  style={{ width: 18, height: 18, borderRadius: 9999, background: "#27ad83", fontSize: 11, fontWeight: 800 }}
+                >
+                  T
+                </span>
+                {invoice.currency}
+              </span>
+            </div>
+            <div className="relative mt-3 flex items-baseline gap-2">
+              <span style={{ fontSize: "clamp(38px, 11vw, 52px)", fontWeight: 830, letterSpacing: "-0.06em", lineHeight: 1 }}>
+                {invoice.amount}
+              </span>
+              <span style={{ fontSize: 15, fontWeight: 700, color: "rgba(255,255,255,0.9)" }}>
+                {invoice.currency}
+              </span>
+            </div>
+            <div className="relative mt-1.5" style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.73)" }}>
+              ≈ {usdValue} USD
             </div>
           </div>
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-            <span className={`w-2 h-2 rounded-full bg-emerald-500 ${rateLive ? "animate-ping" : ""}`} />
-            Live
-          </span>
-        </div>
 
-        {/* Transfer details */}
-        <div className="rounded-2xl bg-white border border-slate-100 mb-4 overflow-hidden">
-          <button
-            onClick={() => setDetailsOpen((o) => !o)}
-            className="w-full flex items-center justify-between px-5 py-4 text-left"
+          {/* Rate card */}
+          <div
+            className="bs-reveal mt-3 flex items-center justify-between"
+            style={{
+              background: "#f7f6ffc7",
+              border: "1px solid rgba(75,62,177,0.1)",
+              borderRadius: 16,
+              padding: "14px 18px",
+              animationDuration: "0.8s",
+              animationDelay: "2.16s",
+              animationTimingFunction: REVEAL_EASE,
+            }}
           >
-            <span className="text-sm font-bold tracking-wide">
-              TRANSFER DETAILS{" "}
-              <span className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 text-violet-700 text-[11px] font-bold">
-                5
-              </span>
+            <div>
+              <div style={{ fontSize: 11, color: "#8f93a8", fontWeight: 500 }}>Current market rate</div>
+              <div className="mt-0.5" style={{ fontSize: 13, fontWeight: 750, color: "#11172c" }}>
+                1 {invoice.currency} = {rate.toFixed(2)} USD
+              </div>
+            </div>
+            <span className="inline-flex items-center gap-1.5" style={{ fontSize: 11, fontWeight: 700, color: rateLive ? "#29b782" : "#8f93a8" }}>
+              <span className="bs-dot-pulse" style={{ width: 7, height: 7, borderRadius: 9999, background: rateLive ? "#29b782" : "#8f93a8", color: rateLive ? "#29b782" : "#8f93a8" }} />
+              {rateLive ? "Live" : "Cached"}
             </span>
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className={`text-slate-400 transition-transform ${detailsOpen ? "rotate-180" : ""}`}
+          </div>
+
+          {/* Transfer details accordion */}
+          <div
+            className="bs-reveal mt-3"
+            style={{
+              border: "1px solid rgba(75,62,177,0.1)",
+              borderRadius: 16,
+              background: "rgba(255,255,255,0.6)",
+              animationDuration: "0.8s",
+              animationDelay: "2.30s",
+              animationTimingFunction: REVEAL_EASE,
+            }}
+          >
+            <button
+              onClick={() => setDetailsOpen((o) => !o)}
+              className="w-full flex items-center justify-between text-left"
+              style={{ padding: "15px 18px" }}
+              aria-expanded={detailsOpen}
             >
-              <path d="M6 9l6 6 6-6" />
-            </svg>
-          </button>
-          {detailsOpen && (
-            <div className="border-t border-slate-100">
-              {details.map(([k, v], i) => (
-                <div
-                  key={k}
-                  className={`flex items-center justify-between px-5 py-3.5 text-sm ${
-                    i !== details.length - 1 ? "border-b border-slate-50" : ""
-                  }`}
+              <span className="inline-flex items-center gap-2" style={{ fontSize: 11, fontWeight: 780, letterSpacing: "0.1em", color: "#343a52" }}>
+                TRANSFER DETAILS
+                <span
+                  className="inline-flex items-center justify-center"
+                  style={{ width: 20, height: 20, borderRadius: 9999, background: "#e9e5ff", color: "#6851f0", fontSize: 10, fontWeight: 800 }}
                 >
-                  <span className="text-slate-400">{k}</span>
-                  <span className="font-semibold text-right max-w-[60%] break-all">{v}</span>
+                  5
+                </span>
+              </span>
+              <span style={{ color: "#8f93a8" }}>
+                <ChevronIcon open={detailsOpen} />
+              </span>
+            </button>
+            <div className={`bs-acc-body ${detailsOpen ? "open" : ""}`}>
+              <div className="bs-acc-inner">
+                <div style={{ borderTop: "1px solid rgba(104,81,240,0.07)" }}>
+                  {details.map(([k, v], i) => (
+                    <div
+                      key={k}
+                      className="flex items-center justify-between gap-4"
+                      style={{
+                        padding: "14px 16px",
+                        borderTop: i === 0 ? "none" : "1px solid rgba(104,81,240,0.07)",
+                      }}
+                    >
+                      <span style={{ fontSize: 11, fontWeight: 500, color: "#8f93a8" }}>{k}</span>
+                      <span
+                        className="text-right break-all"
+                        style={{ fontSize: 11, fontWeight: 670, color: "#343a52", maxWidth: "62%" }}
+                      >
+                        {v}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div
+            className="bs-reveal mt-4 grid gap-3 grid-cols-1 min-[521px]:grid-cols-2"
+            style={{ animationDuration: "0.8s", animationDelay: "2.44s", animationTimingFunction: REVEAL_EASE }}
+          >
+            <WalletConnectButton />
+            <button
+              onClick={copyInvoiceNumber}
+              className="bs-btn-ghost flex items-center justify-center gap-2 font-bold"
+              style={{ borderRadius: 15, minHeight: 51, fontSize: 14, color: "#61667e", padding: "0 16px" }}
+            >
+              Copy invoice number
+              <span style={{ color: "#8f93a8" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="9" width="12" height="12" rx="2.5" />
+                  <path d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5" />
+                </svg>
+              </span>
+            </button>
+          </div>
+
+          {/* TXID */}
+          {invoice.status !== "confirmed" && (
+            <TxidForm invoiceId={invoice.id} onConfirmed={() => fetchStatus()} />
+          )}
+          {invoice.status === "confirmed" && invoice.txid && (
+            <div
+              className="mt-4"
+              style={{ borderRadius: 16, background: "#29b78212", border: "1px solid #29b78233", padding: "16px 18px" }}
+            >
+              <div className="font-bold" style={{ fontSize: 13, color: "#1d8a61" }}>Payment confirmed</div>
+              <div className="break-all font-mono mt-1" style={{ fontSize: 11, color: "#1d8a61" }}>{invoice.txid}</div>
             </div>
           )}
-        </div>
 
-        {/* Actions */}
-        <div className="flex gap-3">
-          <WalletConnectButton />
-          <button
-            onClick={copyInvoiceNumber}
-            className="flex-1 rounded-2xl border-2 border-slate-200 bg-white font-bold py-4 px-4 hover:border-violet-400 active:scale-[0.99] transition flex items-center justify-center gap-2 text-sm"
+          {/* Footer */}
+          <div
+            className="bs-reveal-fade mt-6 text-center"
+            style={{ animationDuration: "0.8s", animationDelay: "2.58s", animationTimingFunction: REVEAL_EASE }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="9" y="9" width="13" height="13" rx="2" />
-              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-            </svg>
-            {copied ? "Copied!" : "Copy invoice number"}
-          </button>
-        </div>
-
-        {/* TXID submission */}
-        {invoice.status !== "confirmed" && (
-          <TxidForm invoiceId={invoice.id} onConfirmed={() => fetchStatus()} />
-        )}
-        {invoice.status === "confirmed" && invoice.txid && (
-          <div className="mt-5 rounded-2xl bg-emerald-50 border border-emerald-200 p-5">
-            <div className="font-bold text-emerald-800 text-sm mb-1">✓ Payment confirmed</div>
-            <div className="text-xs text-emerald-700 break-all font-mono">{invoice.txid}</div>
+            <p className="mb-3" style={{ fontSize: 9, color: "#8f93a8" }}>
+              Invoice status does not replace a blockchain TXID.
+            </p>
+            <TrustRow />
           </div>
-        )}
-
-        {/* Footer */}
-        <div className="mt-8 text-center">
-          <p className="text-xs text-slate-400 mb-3">
-            Invoice status does not replace a blockchain TXID.
-          </p>
-          <div className="flex items-center justify-center gap-4 text-xs text-slate-500 font-medium">
-            <span className="inline-flex items-center gap-1.5">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-              Private
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>
-              Verified request
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
-              Fast
-            </span>
-          </div>
-        </div>
-      </main>
+        </main>
+      </div>
 
       <SupportChat />
+      {toast && <Toast text={toast} />}
     </div>
   );
 }

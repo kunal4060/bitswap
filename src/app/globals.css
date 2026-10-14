@@ -2,26 +2,281 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------- BitSwap design tokens ---------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bs-primary: #6851f0;
+  --bs-deep: #5037d8;
+  --bs-soft: #8e7cff;
+  --bs-lavender: #e9e5ff;
+  --bs-ink: #11172c;
+  --bs-body: #343a52;
+  --bs-muted: #8f93a8;
+  --bs-border: rgba(75, 62, 177, 0.12);
+  --bs-green: #29b782;
+  --bs-orange: #e9932d;
+  --bs-ease: cubic-bezier(0.2, 0.75, 0.2, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--bs-ink);
+  background: #f6f5ff;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+/* Page backdrop washes */
+.bs-page-bg {
+  background:
+    radial-gradient(720px 480px at 12% 4%, rgba(139, 119, 255, 0.18), transparent 65%),
+    radial-gradient(820px 560px at 88% 96%, rgba(96, 72, 238, 0.12), transparent 65%),
+    #f6f5ff;
+}
+
+/* Glass card */
+.bs-glass {
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  box-shadow:
+    0 30px 90px rgba(76, 59, 177, 0.15),
+    0 3px 14px rgba(55, 45, 120, 0.06);
+  animation: bs-breathe 7s ease-in-out infinite;
+}
+
+@keyframes bs-breathe {
+  0%, 100% {
+    box-shadow:
+      0 30px 90px rgba(76, 59, 177, 0.15),
+      0 3px 14px rgba(55, 45, 120, 0.06);
   }
+  50% {
+    box-shadow:
+      0 36px 104px rgba(76, 59, 177, 0.21),
+      0 4px 18px rgba(55, 45, 120, 0.08);
+  }
+}
+
+/* ---------- Boot intro ---------- */
+.bs-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #efeaff 0%, #f6f5ff 55%, #ece7ff 100%);
+  animation: bs-boot-fade 0.55s ease 1.18s forwards;
+  pointer-events: none;
+}
+@keyframes bs-boot-fade {
+  to { opacity: 0; visibility: hidden; }
+}
+.bs-boot-droplet {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50% 50% 50% 4px;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, #8c7aff, #5037d8);
+  box-shadow: 0 10px 30px rgba(104, 81, 240, 0.45);
+  animation: bs-droplet 1.15s var(--bs-ease) forwards;
+}
+@keyframes bs-droplet {
+  0%   { transform: rotate(45deg) translateY(120px) scale(0.4); opacity: 0; }
+  25%  { opacity: 1; }
+  70%  { transform: rotate(45deg) translateY(0) scale(1); opacity: 1; }
+  100% { transform: rotate(45deg) translateY(0) scale(0.2); opacity: 0; }
+}
+.bs-boot-logo {
+  width: 176px;
+  height: 176px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8c7aff 0%, #6851f0 55%, #5037d8 100%);
+  box-shadow:
+    0 24px 70px rgba(104, 81, 240, 0.5),
+    inset 0 2px 6px rgba(255, 255, 255, 0.5);
+  transform: scale(0.18);
+  opacity: 0;
+  animation: bs-logo-bloom 0.9s var(--bs-ease) 0.55s forwards;
+}
+@keyframes bs-logo-bloom {
+  0%   { transform: scale(0.18); opacity: 0; }
+  60%  { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.bs-boot-ring {
+  position: absolute;
+  width: 176px;
+  height: 176px;
+  border-radius: 50%;
+  border: 2px solid rgba(104, 81, 240, 0.55);
+  opacity: 0;
+  animation: bs-ring 1s var(--bs-ease) 0.7s forwards;
+}
+.bs-boot-ring.r2 { animation-delay: 0.85s; }
+@keyframes bs-ring {
+  0%   { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+/* ---------- Staggered reveal ---------- */
+.bs-reveal {
+  opacity: 0;
+  animation: bs-reveal-up 0.8s var(--bs-ease) forwards;
+}
+@keyframes bs-reveal-up {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.bs-reveal-card {
+  opacity: 0;
+  animation: bs-reveal-card 0.85s var(--bs-ease) forwards;
+}
+@keyframes bs-reveal-card {
+  from { opacity: 0; transform: translateY(30px) scale(0.975); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.bs-reveal-fade {
+  opacity: 0;
+  animation: bs-reveal-fade 0.8s var(--bs-ease) forwards;
+}
+@keyframes bs-reveal-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ---------- Ambient loops ---------- */
+.bs-shine { position: relative; overflow: hidden; }
+.bs-shine::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: -30%;
+  width: 45%;
+  transform: skewX(-18deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  animation: bs-shine-sweep 5.4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes bs-shine-sweep {
+  0%, 55%  { left: -30%; }
+  100%     { left: 130%; }
+}
+
+.bs-dot-pulse { position: relative; }
+.bs-dot-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.35;
+  animation: bs-halo 1.7s ease-out infinite;
+}
+@keyframes bs-halo {
+  0%   { transform: scale(0.6); opacity: 0.5; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+.bs-float { animation: bs-float 7s ease-in-out infinite; }
+@keyframes bs-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-14px) rotate(6deg); }
+}
+
+/* ---------- Accordion ---------- */
+.bs-acc-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.34s var(--bs-ease);
+}
+.bs-acc-body.open { grid-template-rows: 1fr; }
+.bs-acc-inner { overflow: hidden; min-height: 0; }
+
+/* ---------- Buttons ---------- */
+.bs-btn-primary {
+  background: linear-gradient(135deg, #8c7aff 0%, #6851f0 60%, #5037d8 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 13px 28px rgba(88, 64, 220, 0.23);
+  transition: transform 0.22s var(--bs-ease), box-shadow 0.22s var(--bs-ease), filter 0.22s;
+}
+.bs-btn-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.04);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 18px 36px rgba(88, 64, 220, 0.32);
+}
+.bs-btn-primary:active { transform: translateY(0); }
+
+.bs-btn-ghost {
+  background: #f8f7ffdb;
+  border: 1px solid rgba(75, 62, 177, 0.12);
+  transition: transform 0.22s var(--bs-ease), box-shadow 0.22s var(--bs-ease), border-color 0.22s;
+}
+.bs-btn-ghost:hover {
+  transform: translateY(-2px);
+  border-color: rgba(104, 81, 240, 0.35);
+  box-shadow: 0 10px 24px rgba(104, 81, 240, 0.12);
+}
+.bs-btn-ghost:active { transform: translateY(0); }
+
+/* ---------- Toast ---------- */
+.bs-toast {
+  animation: bs-toast-in 0.32s var(--bs-ease) forwards;
+}
+@keyframes bs-toast-in {
+  from { opacity: 0; transform: translate(-50%, 12px) scale(0.96); }
+  to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+/* ---------- Inputs ---------- */
+.bs-input {
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s var(--bs-ease);
+}
+.bs-input:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 4px rgba(104, 81, 240, 0.12);
+  outline: none;
+}
+
+/* Amount card decorative ring */
+.bs-amount-ring {
+  position: absolute;
+  width: 208px;
+  height: 208px;
+  border-radius: 50%;
+  border: 34px solid rgba(255, 255, 255, 0.08);
+  top: -72px;
+  right: -56px;
+  pointer-events: none;
+}
+.bs-amount-glow {
+  position: absolute;
+  top: -90px;
+  right: -40px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.22), transparent 65%);
+  pointer-events: none;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .bs-boot { display: none !important; }
+  .bs-reveal, .bs-reveal-card, .bs-reveal-fade { opacity: 1 !important; animation: none !important; }
+  .bs-glass, .bs-shine::after, .bs-dot-pulse::after, .bs-float { animation: none !important; }
+  .bs-shine::after { display: none; }
+  .bs-acc-body { transition: none; }
+  * { scroll-behavior: auto !important; }
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
 import { useWalletReady } from "@/context/wallet";
+import { WalletIcon } from "@/components/ui";
 
 function truncate(addr: string) {
   return addr.length > 12 ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : addr;
@@ -28,42 +29,57 @@ export default function WalletConnectButton({ onConnected }: { onConnected?: () 
     <>
       <button
         onClick={handleClick}
-        className="flex-1 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold py-4 px-4 hover:opacity-95 active:scale-[0.99] transition flex items-center justify-center gap-2 shadow-[0_12px_30px_-10px_rgba(109,88,246,0.7)]"
+        className="bs-btn-primary w-full text-white font-bold flex items-center justify-center gap-2"
+        style={{ borderRadius: 15, minHeight: 51, fontSize: 14, padding: "0 16px" }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="2" y="6" width="20" height="14" rx="3" />
-          <path d="M2 10h20M16 15h2" />
-        </svg>
+        <WalletIcon size={19} />
         {isConnected && address ? truncate(address) : "Connect wallet"}
       </button>
 
       {/* Friendly notice when no WalletConnect project ID is configured */}
       {showNotice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50" onClick={() => setShowNotice(false)}>
+        <div
+          className="fixed inset-0 z-[95] flex items-center justify-center p-4"
+          style={{ background: "rgba(28,24,58,0.45)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }}
+          onClick={() => setShowNotice(false)}
+        >
           <div
-            className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl"
+            className="w-full max-w-sm"
+            style={{
+              background: "rgba(255,255,255,0.96)",
+              borderRadius: 22,
+              padding: 26,
+              boxShadow: "0 30px 90px rgba(76,59,177,0.25)",
+              border: "1px solid rgba(75,62,177,0.12)",
+            }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-extrabold text-xl mb-4">
+            <div
+              className="flex items-center justify-center text-white font-extrabold text-xl mb-4"
+              style={{ width: 48, height: 48, borderRadius: 15, background: "linear-gradient(135deg,#8c7aff,#5037d8)" }}
+            >
               W
             </div>
-            <h3 className="font-bold text-lg mb-2">WalletConnect is not configured</h3>
-            <p className="text-sm text-slate-600 mb-4">
+            <h3 className="font-extrabold text-lg mb-2" style={{ color: "#11172c" }}>
+              WalletConnect is not configured
+            </h3>
+            <p className="text-sm mb-4" style={{ color: "#343a52" }}>
               To enable wallet connections, get a free project ID from{" "}
               <span className="font-mono">cloud.reown.com</span> and set it as{" "}
-              <code className="bg-slate-100 px-1.5 py-0.5 rounded text-xs">
+              <code className="px-1.5 py-0.5 rounded text-xs" style={{ background: "#f1efff" }}>
                 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
               </code>{" "}
-              in your <code className="bg-slate-100 px-1.5 py-0.5 rounded text-xs">.env.local</code>,
+              in your <code className="px-1.5 py-0.5 rounded text-xs" style={{ background: "#f1efff" }}>.env.local</code>,
               then restart the app.
             </p>
-            <p className="text-xs text-slate-500 mb-5">
+            <p className="text-xs mb-5" style={{ color: "#8f93a8" }}>
               We never ask for seed phrases or private keys — only connect through the official
               WalletConnect modal.
             </p>
             <button
               onClick={() => setShowNotice(false)}
-              className="w-full rounded-xl bg-slate-900 text-white font-semibold py-3 text-sm hover:bg-slate-800"
+              className="bs-btn-primary w-full text-white font-bold text-sm"
+              style={{ borderRadius: 14, padding: "13px 0" }}
             >
               Got it
             </button>

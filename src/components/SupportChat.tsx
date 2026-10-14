@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { ChatIcon } from "@/components/ui";
 
 interface Msg {
   from: "user" | "bot";
@@ -46,43 +47,102 @@ export default function SupportChat() {
 
   return (
     <>
-      {/* Floating button */}
+      {/* Floating launcher: 58px teal circle, bottom-right 24px offsets */}
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="Open support chat"
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-teal-600 hover:bg-teal-700 text-white shadow-[0_10px_30px_-8px_rgba(13,148,136,0.7)] flex items-center justify-center transition active:scale-95"
+        className="fixed z-[80] flex items-center justify-center transition active:scale-95 hover:-translate-y-0.5"
+        style={{
+          bottom: 24,
+          right: 24,
+          width: 58,
+          height: 58,
+          borderRadius: 9999,
+          background: "#087f88",
+          boxShadow: "0 8px 24px rgba(4,65,75,0.28), inset 0 1px 0 rgba(255,255,255,0.25)",
+        }}
       >
         {open ? (
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
         ) : (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" /></svg>
+          <ChatIcon size={26} />
         )}
-        <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-teal-600" />
+        <span
+          className="absolute"
+          style={{
+            top: 3,
+            right: 3,
+            width: 12,
+            height: 12,
+            borderRadius: 9999,
+            background: "#29b782",
+            border: "2.5px solid #087f88",
+          }}
+        />
       </button>
 
       {/* Panel */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-[330px] max-w-[calc(100vw-3rem)] h-[440px] max-h-[60vh] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
-          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-slate-100">
-            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" /></svg>
+        <div
+          className="fixed z-[80] flex flex-col overflow-hidden"
+          style={{
+            bottom: 96,
+            right: 24,
+            width: 330,
+            maxWidth: "calc(100vw - 48px)",
+            height: 440,
+            maxHeight: "60vh",
+            background: "rgba(255,255,255,0.97)",
+            borderRadius: 22,
+            border: "1px solid rgba(75,62,177,0.12)",
+            boxShadow: "0 30px 90px rgba(76,59,177,0.22)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+          }}
+        >
+          <div
+            className="flex items-center gap-3"
+            style={{ padding: "16px 18px", borderBottom: "1px solid rgba(75,62,177,0.08)" }}
+          >
+            <div
+              className="flex items-center justify-center shrink-0"
+              style={{ width: 42, height: 42, borderRadius: 9999, background: "linear-gradient(135deg,#0aa0ac,#087f88)" }}
+            >
+              <ChatIcon size={22} />
             </div>
             <div className="flex-1">
-              <div className="font-bold text-sm">Support</div>
-              <div className="text-xs text-emerald-600 font-medium">Online</div>
+              <div className="font-extrabold" style={{ fontSize: 14, color: "#11172c" }}>Support</div>
+              <div className="font-semibold" style={{ fontSize: 11, color: "#29b782" }}>Online</div>
             </div>
-            <button onClick={() => setOpen(false)} aria-label="Close chat" className="text-slate-400 hover:text-slate-600 text-xl leading-none px-1">×</button>
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Close chat"
+              className="leading-none"
+              style={{ color: "#8f93a8", fontSize: 22, padding: 4 }}
+            >
+              ×
+            </button>
           </div>
 
-          <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5 bg-slate-50">
+          <div ref={listRef} className="flex-1 overflow-y-auto space-y-2.5" style={{ padding: "14px 16px", background: "#f8f7ff80" }}>
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-snug ${
-                    m.from === "user"
-                      ? "bg-violet-600 text-white rounded-br-md"
-                      : "bg-white border border-slate-200 text-slate-800 rounded-bl-md"
-                  }`}
+                  className="leading-snug"
+                  style={{
+                    maxWidth: "80%",
+                    borderRadius: 16,
+                    borderBottomRightRadius: m.from === "user" ? 6 : 16,
+                    borderBottomLeftRadius: m.from === "user" ? 16 : 6,
+                    padding: "10px 14px",
+                    fontSize: 13,
+                    background: m.from === "user" ? "linear-gradient(135deg,#8c7aff,#5037d8)" : "#fff",
+                    color: m.from === "user" ? "#fff" : "#343a52",
+                    border: m.from === "user" ? "none" : "1px solid rgba(75,62,177,0.1)",
+                    boxShadow: m.from === "user" ? "0 6px 16px rgba(104,81,240,0.25)" : "none",
+                  }}
                 >
                   {m.text}
                 </div>
@@ -90,29 +150,50 @@ export default function SupportChat() {
             ))}
             {sending && (
               <div className="flex justify-start">
-                <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-md px-3.5 py-2.5 text-sm text-slate-400">Typing…</div>
+                <div
+                  className="text-sm"
+                  style={{
+                    background: "#fff",
+                    border: "1px solid rgba(75,62,177,0.1)",
+                    borderRadius: 16,
+                    borderBottomLeftRadius: 6,
+                    padding: "10px 14px",
+                    color: "#8f93a8",
+                  }}
+                >
+                  Typing…
+                </div>
               </div>
             )}
           </div>
 
-          <div className="border-t border-slate-100 p-3 flex gap-2">
+          <div className="flex gap-2" style={{ borderTop: "1px solid rgba(75,62,177,0.08)", padding: 12 }}>
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && send()}
               placeholder="Write a message"
-              className="flex-1 rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-violet-500"
+              className="bs-input flex-1"
+              style={{
+                borderRadius: 12,
+                border: "1px solid rgba(75,62,177,0.14)",
+                padding: "10px 14px",
+                fontSize: 13,
+                color: "#11172c",
+              }}
             />
             <button
               onClick={send}
               disabled={sending || !input.trim()}
               aria-label="Send message"
-              className="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center hover:bg-violet-700 disabled:opacity-40 shrink-0"
+              className="bs-btn-primary shrink-0 flex items-center justify-center text-white disabled:opacity-40"
+              style={{ width: 42, height: 42, borderRadius: 12 }}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z" />
+              </svg>
             </button>
           </div>
-          <div className="text-center text-[11px] text-slate-400 pb-2">Support</div>
         </div>
       )}
     </>

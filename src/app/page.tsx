@@ -3,6 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { NETWORKS } from "@/lib/networks";
+import BootIntro from "@/components/BootIntro";
+import Brandbar from "@/components/Brandbar";
+import SupportChat from "@/components/SupportChat";
+import { TrustRow, FloatingDecor } from "@/components/ui";
+
+const REVEAL_EASE = "cubic-bezier(.2,.75,.2,1)";
 
 export default function Home() {
   const router = useRouter();
@@ -37,132 +43,188 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f5fb] text-slate-900">
-      {/* Header */}
-      <header className="flex items-center justify-between px-6 sm:px-10 py-5">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-extrabold text-lg">
-            S
-          </div>
-          <span className="text-xl font-bold tracking-tight">
-            Bit<span className="text-violet-600">Swap</span>
-          </span>
-        </div>
-        <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-600 border border-slate-200 rounded-full px-3 py-1.5 bg-white">
-          <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          Secure invoice
-        </div>
-      </header>
+    <div className="bs-page-bg min-h-screen" style={{ color: "#11172c" }}>
+      <BootIntro />
+      <FloatingDecor />
 
-      <main className="max-w-3xl mx-auto px-6 pb-20">
-        {/* Hero */}
-        <div className="text-center pt-10 pb-8">
-          <p className="text-xs font-semibold tracking-[0.2em] text-violet-600 uppercase mb-3">
-            USDT invoice payments
-          </p>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4">
-            Get paid in crypto,
-            <br />
-            <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
-              minus the headache.
-            </span>
-          </h1>
-          <p className="text-slate-500 max-w-md mx-auto">
-            Create a shareable invoice in seconds. Your payer connects a wallet,
-            sends USDT, and you both watch it confirm — live.
-          </p>
-        </div>
+      <div className="relative z-10 mx-auto w-full max-w-[480px] px-5" style={{ paddingTop: 30, paddingBottom: 48 }}>
+        <Brandbar />
 
-        {/* Create invoice card */}
-        <form
-          onSubmit={onSubmit}
-          className="bg-white rounded-3xl shadow-[0_20px_60px_-20px_rgba(109,88,246,0.35)] border border-violet-100 p-6 sm:p-8"
+        <main
+          className="bs-glass bs-reveal-card rounded-[26px]"
+          style={{ padding: 25, animationDuration: "0.85s", animationDelay: "1.62s" }}
         >
-          <h2 className="text-lg font-bold mb-1">Create invoice</h2>
-          <p className="text-sm text-slate-500 mb-6">
+          {/* Head */}
+          <p style={{ fontSize: 11, fontWeight: 780, letterSpacing: "0.12em", color: "#6851f0" }}>
+            USDT INVOICES
+          </p>
+          <h1
+            className="mt-1.5"
+            style={{ fontSize: 26, fontWeight: 810, letterSpacing: "-0.045em", color: "#11172c" }}
+          >
+            Create <span style={{ color: "#6851f0" }}>invoice</span>
+          </h1>
+          <p className="mt-1.5" style={{ fontSize: 12, color: "#8f93a8" }}>
             You&apos;ll get a payment link you can send to anyone.
           </p>
 
-          <label className="block text-sm font-semibold mb-2">Amount (USDT)</label>
-          <div className="relative mb-5">
-            <input
-              type="number"
-              min="0"
-              step="any"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="w-full rounded-2xl border border-slate-200 px-5 py-4 text-3xl font-extrabold outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-100 pr-20"
-              placeholder="25"
-            />
-            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
-              USDT
-            </span>
-          </div>
+          <div className="my-5" style={{ borderTop: "1px solid rgba(75,62,177,0.1)" }} />
 
-          <label className="block text-sm font-semibold mb-2">Network</label>
-          <div className="grid sm:grid-cols-3 gap-3 mb-5">
-            {NETWORKS.map((n) => (
-              <button
-                key={n.id}
-                type="button"
-                onClick={() => setNetwork(n.id)}
-                className={`rounded-2xl border px-4 py-3.5 text-left transition ${
-                  network === n.id
-                    ? "border-violet-600 bg-violet-50 ring-2 ring-violet-100"
-                    : "border-slate-200 hover:border-violet-300 bg-white"
-                }`}
+          <form onSubmit={onSubmit}>
+            {/* Amount */}
+            <div
+              className="bs-reveal"
+              style={{ animationDuration: "0.8s", animationDelay: "2.02s", animationTimingFunction: REVEAL_EASE }}
+            >
+              <label className="block mb-2" style={{ fontSize: 11, fontWeight: 780, letterSpacing: "0.1em", color: "#343a52" }}>
+                AMOUNT
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="25"
+                  className="bs-input w-full"
+                  style={{
+                    borderRadius: 16,
+                    border: "1px solid rgba(75,62,177,0.14)",
+                    background: "#f8f7ffdb",
+                    padding: "16px 76px 16px 18px",
+                    fontSize: 30,
+                    fontWeight: 830,
+                    letterSpacing: "-0.04em",
+                    color: "#11172c",
+                  }}
+                />
+                <span
+                  className="absolute right-5 top-1/2 -translate-y-1/2"
+                  style={{ fontSize: 12, fontWeight: 800, color: "#8f93a8" }}
+                >
+                  USDT
+                </span>
+              </div>
+            </div>
+
+            {/* Network */}
+            <div
+              className="bs-reveal mt-5"
+              style={{ animationDuration: "0.8s", animationDelay: "2.16s", animationTimingFunction: REVEAL_EASE }}
+            >
+              <label className="block mb-2" style={{ fontSize: 11, fontWeight: 780, letterSpacing: "0.1em", color: "#343a52" }}>
+                NETWORK
+              </label>
+              <div className="grid grid-cols-3 gap-2.5">
+                {NETWORKS.map((n) => {
+                  const active = network === n.id;
+                  return (
+                    <button
+                      key={n.id}
+                      type="button"
+                      onClick={() => setNetwork(n.id)}
+                      className="text-left"
+                      style={{
+                        borderRadius: 14,
+                        border: active ? "1.5px solid #6851f0" : "1px solid rgba(75,62,177,0.12)",
+                        background: active ? "#6851f00d" : "#f8f7ffdb",
+                        padding: "12px 10px",
+                        boxShadow: active ? "0 0 0 3px rgba(104,81,240,0.1)" : "none",
+                        transition: "all .2s cubic-bezier(.2,.75,.2,1)",
+                      }}
+                    >
+                      <div style={{ fontSize: 13, fontWeight: 800, color: active ? "#5037d8" : "#343a52" }}>
+                        {n.short}
+                      </div>
+                      <div className="mt-0.5" style={{ fontSize: 9.5, color: "#8f93a8", fontWeight: 500, lineHeight: 1.3 }}>
+                        {n.name}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Label */}
+            <div
+              className="bs-reveal mt-5"
+              style={{ animationDuration: "0.8s", animationDelay: "2.30s", animationTimingFunction: REVEAL_EASE }}
+            >
+              <label className="block mb-2" style={{ fontSize: 11, fontWeight: 780, letterSpacing: "0.1em", color: "#343a52" }}>
+                LABEL <span style={{ color: "#8f93a8", fontWeight: 500, letterSpacing: 0 }}>(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                maxLength={140}
+                placeholder="e.g. Freelance design — October"
+                className="bs-input w-full"
+                style={{
+                  borderRadius: 14,
+                  border: "1px solid rgba(75,62,177,0.14)",
+                  background: "#f8f7ffdb",
+                  padding: "13px 16px",
+                  fontSize: 13,
+                  color: "#11172c",
+                }}
+              />
+            </div>
+
+            {error && (
+              <div
+                className="mt-4"
+                style={{
+                  borderRadius: 14,
+                  background: "#e93d3d0f",
+                  border: "1px solid #e93d3d33",
+                  color: "#c92a2a",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  padding: "12px 16px",
+                }}
               >
-                <div className="font-bold text-sm">{n.short}</div>
-                <div className="text-xs text-slate-500">{n.name}</div>
+                {error}
+              </div>
+            )}
+
+            {/* Submit */}
+            <div
+              className="bs-reveal mt-5"
+              style={{ animationDuration: "0.8s", animationDelay: "2.44s", animationTimingFunction: REVEAL_EASE }}
+            >
+              <button
+                type="submit"
+                disabled={loading}
+                className="bs-btn-primary w-full text-white font-extrabold flex items-center justify-center gap-2 disabled:opacity-60"
+                style={{ borderRadius: 15, minHeight: 54, fontSize: 16 }}
+              >
+                {loading ? (
+                  <span
+                    className="inline-block w-5 h-5 rounded-full animate-spin"
+                    style={{ border: "2.5px solid rgba(255,255,255,0.35)", borderTopColor: "#fff" }}
+                  />
+                ) : null}
+                {loading ? "Creating…" : "Create invoice"}
               </button>
-            ))}
-          </div>
-
-          <label className="block text-sm font-semibold mb-2">
-            Label <span className="font-normal text-slate-400">(optional)</span>
-          </label>
-          <input
-            type="text"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            maxLength={140}
-            placeholder="e.g. Freelance design — October"
-            className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-100 mb-6"
-          />
-
-          {error && (
-            <div className="mb-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3">
-              {error}
             </div>
-          )}
+          </form>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold py-4 text-lg hover:opacity-95 active:scale-[0.99] transition disabled:opacity-60 shadow-[0_12px_30px_-10px_rgba(109,88,246,0.7)]"
+          {/* Footer */}
+          <div
+            className="bs-reveal-fade mt-6 text-center"
+            style={{ animationDuration: "0.8s", animationDelay: "2.58s", animationTimingFunction: REVEAL_EASE }}
           >
-            {loading ? "Creating…" : "Create invoice"}
-          </button>
-        </form>
+            <p className="mb-3" style={{ fontSize: 9, color: "#8f93a8" }}>
+              Invoice status does not replace a blockchain TXID.
+            </p>
+            <TrustRow />
+          </div>
+        </main>
+      </div>
 
-        {/* Feature bullets */}
-        <div className="grid sm:grid-cols-3 gap-4 mt-8 text-center">
-          {[
-            ["Private", "No account needed. Invoices are just links."],
-            ["Verified request", "On-chain receipt checks for BSC."],
-            ["Fast", "Live status updates as it confirms."],
-          ].map(([t, d]) => (
-            <div key={t} className="bg-white rounded-2xl border border-slate-100 px-4 py-5">
-              <div className="font-bold text-sm mb-1">✓ {t}</div>
-              <div className="text-xs text-slate-500">{d}</div>
-            </div>
-          ))}
-        </div>
-
-        <p className="text-center text-xs text-slate-400 mt-10">
-          Invoice status does not replace a blockchain TXID.
-        </p>
-      </main>
+      <SupportChat />
     </div>
   );
 }

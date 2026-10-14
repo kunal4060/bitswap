@@ -46,34 +46,58 @@ export default function TxidForm({
   }
 
   return (
-    <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
-      <h3 className="font-bold text-sm mb-1">I&apos;ve sent the payment — submit TXID</h3>
-      <p className="text-xs text-slate-500 mb-3">
+    <div
+      className="mt-4"
+      style={{
+        borderRadius: 16,
+        border: "1px solid rgba(75,62,177,0.1)",
+        background: "#f8f7ffdb",
+        padding: "18px",
+      }}
+    >
+      <h3 className="font-extrabold" style={{ fontSize: 13, color: "#11172c" }}>
+        I&apos;ve sent the payment — submit TXID
+      </h3>
+      <p className="mb-3 mt-1" style={{ fontSize: 11, color: "#8f93a8" }}>
         Paste your transaction hash and we&apos;ll verify it on the blockchain.
       </p>
-      <form onSubmit={submit} className="flex flex-col sm:flex-row gap-2">
+      <form onSubmit={submit} className="flex flex-col min-[521px]:flex-row gap-2">
         <input
           value={txid}
           onChange={(e) => setTxid(e.target.value)}
           placeholder="0x…"
           spellCheck={false}
-          className="flex-1 rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-mono outline-none focus:border-violet-500"
+          className="bs-input flex-1 font-mono"
+          style={{
+            borderRadius: 12,
+            border: "1px solid rgba(75,62,177,0.14)",
+            background: "#fff",
+            padding: "11px 14px",
+            fontSize: 12,
+            color: "#11172c",
+          }}
         />
         <button
           type="submit"
           disabled={loading || !txid.trim()}
-          className="rounded-xl bg-slate-900 text-white text-sm font-semibold px-5 py-2.5 hover:bg-slate-800 disabled:opacity-50"
+          className="bs-btn-primary text-white font-bold shrink-0 disabled:opacity-50"
+          style={{ borderRadius: 12, fontSize: 13, padding: "11px 22px" }}
         >
           {loading ? "Verifying…" : "Verify"}
         </button>
       </form>
       {message && (
         <div
-          className={`mt-3 rounded-xl px-4 py-3 text-sm border ${
-            message.ok
-              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-              : "bg-red-50 border-red-200 text-red-700"
-          }`}
+          className="mt-3"
+          style={{
+            borderRadius: 12,
+            padding: "12px 14px",
+            fontSize: 12,
+            fontWeight: 600,
+            background: message.ok ? "#29b78212" : "#e93d3d0f",
+            border: message.ok ? "1px solid #29b78233" : "1px solid #e93d3d33",
+            color: message.ok ? "#1d8a61" : "#c92a2a",
+          }}
         >
           {message.text}
         </div>

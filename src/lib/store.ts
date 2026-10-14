@@ -16,11 +16,12 @@ export interface Invoice {
   updatedAt: string;
 }
 
-// In-memory fallback (local dev without a Blob token, or cold-start safety net).
+// In-memory fallback (local dev without a Blob token, or Blob outage safety net).
 const mem = new Map<string, Invoice>();
 
 function blobToken(): string | null {
-  return process.env.BLOB_READ_WRITE_TOKEN ?? null;
+  const t = (process.env.BLOB_READ_WRITE_TOKEN ?? "").trim();
+  return t.length > 0 ? t : null;
 }
 
 function blobPath(id: string): string {
@@ -39,8 +40,9 @@ async function readInvoice(id: string): Promise<Invoice | null> {
     const res = await fetch(meta.url);
     if (!res.ok) return null;
     return (await res.json()) as Invoice;
-  } catch {
-    return null;
+  } catch (err) {
+    console.error("blob read failed, memory fallback:", err);
+    return mem.get(id) ?? null;
   }
 }
 
@@ -50,12 +52,17 @@ async function writeInvoice(inv: Invoice): Promise<void> {
     mem.set(inv.id, inv);
     return;
   }
-  await put(blobPath(inv.id), JSON.stringify(inv), {
-    access: "public",
-    addRandomSuffix: false,
-    contentType: "application/json",
-    token,
-  });
+  try {
+    await put(blobPath(inv.id), JSON.stringify(inv), {
+      access: "public",
+      addRandomSuffix: false,
+      contentType: "application/json",
+      token,
+    });
+  } catch (err) {
+    console.error("blob write failed, memory fallback:", err);
+    mem.set(inv.id, inv);
+  }
 }
 
 export async function createInvoice(data: {
