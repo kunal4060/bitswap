@@ -9,6 +9,10 @@ official **Reown AppKit (WalletConnect)** SDK.
 > We never ask for seed phrases or private keys. Wallets connect only through
 > the official Reown AppKit modal.
 
+## Live demo
+
+Try the deployed app: **https://bitswap.vercel.app**
+
 ## Features
 
 - **Create invoice** (`/`) — amount in USDT, network picker (BNB Smart Chain
