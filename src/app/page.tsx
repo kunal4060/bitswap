@@ -5,6 +5,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import {
   useAccount,
   useBalance,
@@ -21,7 +22,12 @@ import {
 } from "viem";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import EvmConnectButton from "@/components/evm-connect";
+// Client-only: useAppKit() throws during SSR prerender because createAppKit
+// runs on the client only. Dynamic import with ssr:false keeps it out of
+// the prerender; the button appears once the page hydrates.
+const EvmConnectButton = dynamic(() => import("@/components/evm-connect"), {
+  ssr: false,
+});
 import {
   NETWORKS,
   NETWORK_ORDER,
