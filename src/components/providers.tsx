@@ -5,14 +5,14 @@
 
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import {
-  ConnectionProvider,
-  WalletProvider as SolanaWalletProvider,
+  ConnectionProvider as SolanaConnectionProviderBase,
+  WalletProvider as SolanaWalletProviderBase,
 } from "@solana/wallet-adapter-react";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+import { WalletModalProvider as SolanaWalletModalProviderBase } from "@solana/wallet-adapter-react-ui";
 import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
@@ -21,6 +21,22 @@ import { clusterApiUrl } from "@solana/web3.js";
 import { wagmiConfig, initAppKit } from "@/config/wallets";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
+
+// @solana/wallet-adapter-react ships React 18-style FC types, which React 19's
+// JSX checking rejects ("cannot be used as a JSX component"). These casts are
+// type-only — the runtime components are unchanged.
+const ConnectionProvider = SolanaConnectionProviderBase as unknown as ComponentType<{
+  endpoint: string;
+  children: ReactNode;
+}>;
+const SolanaWalletProvider = SolanaWalletProviderBase as unknown as ComponentType<{
+  wallets: unknown[];
+  autoConnect?: boolean;
+  children: ReactNode;
+}>;
+const WalletModalProvider = SolanaWalletModalProviderBase as unknown as ComponentType<{
+  children: ReactNode;
+}>;
 
 export default function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
