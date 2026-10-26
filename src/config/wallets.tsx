@@ -1,8 +1,10 @@
 // EVM wallet setup — Reown AppKit + wagmi v3 + viem.
-// AppKit is created ONLY when a WalletConnect project ID is configured
-// (env var NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID). Without it, the EVM
-// connect button shows a notice instead of the modal — Tron and Solana
-// do not need this ID and keep working.
+// AppKit is created ONLY when a WalletConnect project ID is configured.
+// The ID comes from env var NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID, with a
+// built-in default: the project's own Reown "Send USDT" ID (a public client
+// identifier — it ships in frontend code by design, it is not a secret).
+// Without any ID, the EVM connect button shows a notice instead of the
+// modal — Tron and Solana do not need this ID and keep working.
 
 import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
@@ -10,7 +12,9 @@ import { mainnet, bsc } from "@reown/appkit/networks";
 import { http } from "wagmi";
 import { NETWORKS } from "./networks";
 
-export const PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+export const PROJECT_ID =
+  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ??
+  "278c9be47caf7bf2b350f2944cb3f8ec";
 
 export const wagmiAdapter = new WagmiAdapter({
   ssr: true,
