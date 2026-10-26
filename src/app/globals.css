@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: "Inter", system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-inter);
+  color: #343a52;
+  background-color: #f6f5ff;
+  background-image:
+    radial-gradient(600px 400px at 8% -5%, rgba(142, 124, 255, 0.18), transparent 60%),
+    radial-gradient(600px 500px at 95% 105%, rgba(104, 81, 240, 0.12), transparent 60%);
+  background-attachment: fixed;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.card-in {
+  animation: card-in 0.85s cubic-bezier(0.2, 0.75, 0.2, 1) both;
+}
+
+@keyframes dot-halo {
+  0% {
+    box-shadow: 0 0 0 0 rgba(41, 183, 130, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(41, 183, 130, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(41, 183, 130, 0);
+  }
+}
+
+.dot-pulse {
+  animation: dot-halo 1.7s ease-out infinite;
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.float-slow {
+  animation: float-y 8s ease-in-out infinite;
+}
+
+.float-slow2 {
+  animation: float-y 7s ease-in-out infinite reverse;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-in,
+  .dot-pulse,
+  .float-slow,
+  .float-slow2 {
+    animation: none;
+  }
+}
